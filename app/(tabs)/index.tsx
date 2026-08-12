@@ -1,5 +1,3 @@
-import { getBooks } from "../../api/bookApi";
-getBooks().then(data => console.log(data) );
 import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
 
