@@ -16,4 +16,8 @@ async function deleteGame(id) {
     return apiDelete("/games/" + id);
 }
 
-export { getGames, getGameById, addGame, deleteGame }
+async function searchByCreator(creator) {
+    return apiGet("/games/search/creator?creator=" + creator);
+}
+
+export { getGames, getGameById, addGame, deleteGame, searchByCreator }

@@ -16,4 +16,21 @@ async function deleteBook(id) {
     return apiDelete("/books/" + id);
 }
 
-export {getBooks, getBookById, addBook, deleteBook}
+async function searchByAuthor(author) {
+    return apiGet("/books/search/author?author=" + author);
+}
+
+async function searchByFormat(bookFormat) {
+    return apiGet("/books/search/format?bookFormat=" + bookFormat);
+}
+
+async function searchByFanficType(fanficType) {
+    return apiGet("/books/search/fanfictype?fanficType=" + fanficType)
+}
+
+async function searchByFandom(fandom) {
+    return apiGet("/books/search/fandom?fandom=" + fandom)
+}
+
+export {getBooks, getBookById, addBook, deleteBook, searchByAuthor, 
+    searchByFormat, searchByFanficType, searchByFandom}

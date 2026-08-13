@@ -16,4 +16,17 @@ async function deleteTvSeries(id) {
     return apiDelete("/tvseries/" + id);
 }
 
-export { getTvSeries, getTvSeriesById, addTvSeries, deleteTvSeries }
+async function addSeason(id, seasonRequest){
+    return apiPost("/tvseries/" + id + "/season", seasonRequest);
+}
+
+async function searchBySeasonNumber(nr) {
+    return apiGet("/tvseries/search/season?nr=" + nr);
+}
+
+async function getSeasonByTvSeries(id) {
+    return apiGet("/tvseries/" + id + "/season");
+}
+
+export { getTvSeries, getTvSeriesById, addTvSeries, deleteTvSeries,
+    addSeason, searchBySeasonNumber, getSeasonByTvSeries }
