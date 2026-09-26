@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { getBooks } from "../api/bookApi";
 import { Text, View, FlatList, Pressable } from "react-native";
-
-type Book = {
-    id: number; 
-    title: string;
-}
+import { Book } from "../types/Book";
 
 export default function BooksScreen (){
     const [books, setBooks] = useState<Book[]>([]);
