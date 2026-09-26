@@ -3,7 +3,7 @@ import { getBooks } from "../api/bookApi";
 import { Text, View, FlatList, Pressable } from "react-native";
 
 type Book = {
-    itemId: number; 
+    id: number; 
     title: string;
 }
 
@@ -24,22 +24,18 @@ export default function BooksScreen (){
 
     if (error) {
         return <Text>Något gick fel: {error}</Text>
-    }
-
-    if (loading) {
+    } else if (loading) {
         return <Text>Laddar...</Text>
-    }
-
-    if (books.length == 0) {
+    } else if (books.length == 0) {
         return <Text>Inga Böcker än</Text>
     }
 
     return (
       <FlatList
         data={books}
-        keyExtractor={(item) => item.itemId.toString()}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Pressable onPress={() => console.log("Tryckte på", item.itemId)}>
+          <Pressable onPress={() => console.log("Tryckte på", item.id)}>
             <Text>{item.title}</Text>
           </Pressable>
         )}
