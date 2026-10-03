@@ -13,6 +13,7 @@ async function apiGet(path){
     }catch (error) {
 
         console.error(error);
+        throw (error);
     }
 }
 
@@ -22,6 +23,7 @@ async function apiPost(path, body){
         return response.data;
     } catch (error) {
         console.error(error);
+        throw (error);
     }
 }
 
@@ -31,6 +33,7 @@ async function apiDelete(path){
         return response.data;
     } catch (error) {
         console.error(error);
+        throw (error);
     }
 }
 
