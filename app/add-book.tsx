@@ -10,6 +10,24 @@ export default function AddBookScreen() {
     const [isAddingLanguage, setIsAddingLanguage] = useState(false);
     const [newLanguage, setNewLanguage] = useState("")
 
+    function handleAddLanguage() {
+        const trimmed = newLanguage.trim();
+        if (trimmed === "") {
+            return 
+        }
+        if (languages.includes(trimmed)) {
+            setFormData({ ...formData, language: trimmed })
+            setNewLanguage("");
+            setIsAddingLanguage(false);
+            return
+        }
+        
+        setLanguages([...languages, trimmed]);
+        setFormData({ ...formData, language: trimmed });
+        setNewLanguage("");
+        setIsAddingLanguage(false);
+    }
+
     function handleSubmit() {
         console.log(formData);
     }
@@ -43,10 +61,15 @@ export default function AddBookScreen() {
             </Pressable>
 
             {isAddingLanguage && (
-                <TextInput
-                    value={newLanguage}
-                    onChangeText={(text) => setNewLanguage(text)}
-                />
+                <View>
+                    <TextInput
+                        value={newLanguage}
+                        onChangeText={(text) => setNewLanguage(text)}
+                    />
+                    <Pressable onPress={handleAddLanguage}>
+                        <Text>Lägg Till</Text>
+                    </Pressable>
+                </View>
             )}
             <Pressable onPress={handleSubmit}>
                 <Text>Spara</Text>   
@@ -54,4 +77,3 @@ export default function AddBookScreen() {
         </View>    
     );   
 }
- 
