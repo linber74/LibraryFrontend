@@ -15,15 +15,18 @@ export default function AddBookScreen() {
         if (trimmed === "") {
             return 
         }
-        if (languages.includes(trimmed)) {
-            setFormData({ ...formData, language: trimmed })
+
+        const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
+
+        if (languages.includes(formatted)) {
+            setFormData({ ...formData, language: formatted })
             setNewLanguage("");
             setIsAddingLanguage(false);
             return
         }
         
-        setLanguages([...languages, trimmed]);
-        setFormData({ ...formData, language: trimmed });
+        setLanguages([...languages, formatted]);
+        setFormData({ ...formData, language: formatted });
         setNewLanguage("");
         setIsAddingLanguage(false);
     }
