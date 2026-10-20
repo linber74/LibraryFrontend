@@ -1,113 +1,161 @@
-import { useState, useEffect } from "react"
-import { Pressable, TextInput, Text, View } from "react-native"
+import { useState, useEffect } from "react";
+import { Pressable, TextInput, Text, View } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { getAllGenres, getAllLanguages } from "../api/libraryApi"
+import { getAllGenres, getAllLanguages } from "../api/libraryApi";
+import { formatName } from "../utils/formatName";
 
 export default function AddBookScreen() {
-     
-    const [formData, setFormData] = useState({ title: "", language : "" , genre : [] as string[]});
-    const [languages, setLanguages] = useState<string[]>([]);
-    const [isAddingLanguage, setIsAddingLanguage] = useState(false);
-    const [newLanguage, setNewLanguage] = useState("");
-    const [genres, setGenres] = useState<string[]>([]);
+  const [formData, setFormData] = useState({
+    title: "",
+    language: "",
+    genre: [] as string[],
+  });
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [isAddingLanguage, setIsAddingLanguage] = useState(false);
+  const [newLanguage, setNewLanguage] = useState("");
+  const [genres, setGenres] = useState<string[]>([]);
+  const [isAddingGenre, setIsAddingGenre] = useState(false);
+  const [newGenre, setNewGenre] = useState("");
 
-    function handleAddLanguage() {
-        const trimmed = newLanguage.trim();
-        if (trimmed === "") {
-            return 
-        }
+  function handleAddLanguage() {
+    const formatted = formatName(newLanguage);
 
-        const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
-
-        if (languages.includes(formatted)) {
-            setFormData({ ...formData, language: formatted })
-            setNewLanguage("");
-            setIsAddingLanguage(false);
-            return
-        }
-        
-        setLanguages([...languages, formatted]);
-        setFormData({ ...formData, language: formatted });
-        setNewLanguage("");
-        setIsAddingLanguage(false);
+    if (formatted === "") {
+      return;
     }
 
-    function toggleGenre(g: string) {
-        if (formData.genre.includes(g)) {
-            setFormData({ ...formData, genre: formData.genre.filter(x => x !== g)})
-        } else {
-            setFormData({ ...formData, genre: [...formData.genre, g]})
-        }       
+    if (languages.includes(formatted)) {
+      setFormData({ ...formData, language: formatted });
+      setNewLanguage("");
+      setIsAddingLanguage(false);
+      return;
     }
 
-    function handleSubmit() {
-        console.log(formData);
+    setLanguages([...languages, formatted]);
+    setFormData({ ...formData, language: formatted });
+    setNewLanguage("");
+    setIsAddingLanguage(false);
+  }
+
+  function toggleGenre(g: string) {
+    if (formData.genre.includes(g)) {
+      setFormData({
+        ...formData,
+        genre: formData.genre.filter((x) => x !== g),
+      });
+    } else {
+      setFormData({ ...formData, genre: [...formData.genre, g] });
+    }
+  }
+
+  function handleAddGenre() {
+    const formatted = formatName(newGenre);
+
+    if (formatted === "") {
+      return;
     }
 
-    useEffect(() => {
-        getAllLanguages().then(data => {
-            console.log(data);
-            setLanguages(data);
-        }).catch(err => {
-            console.log(err.message)
-        })
-    }, []);
+    if (genres.includes(formatted)) {
+      if (!formData.genre.includes(formatted)) {
+        setFormData({ ...formData, genre: [...formData.genre, formatted] });
+      }
+      setNewGenre("");
+      setIsAddingGenre(false);
+      return;
+    }
 
-    useEffect(() => {
-        getAllGenres().then(data => {
-            console.log(data);
-            setGenres(data);
-        }).catch(err => {
-            console.log(err.message);
-        })
-    }, []);
+    setGenres([...genres, formatted]);
+    setFormData({ ...formData, genre: [...formData.genre, formatted] });
+    setNewGenre("");
+    setIsAddingGenre(false);
+  }
 
-    return (
-      <View>
-        <TextInput
-          value={formData.title}
-          onChangeText={(text) => setFormData({ ...formData, title: text })}
-        />
-        <Picker
-          selectedValue={formData.language}
-          onValueChange={(value) =>
-            setFormData({ ...formData, language: value })
-          }
-        >
-          <Picker.Item label="Välj språk..." value="" />
-          {languages.map((lang) => (
-            <Picker.Item key={lang} label={lang} value={lang} />
-          ))}
-        </Picker>
-        <Pressable onPress={() => setIsAddingLanguage(!isAddingLanguage)}>
-          <Text>+ Nytt Språk</Text>
-        </Pressable>
+  function handleSubmit() {
+    console.log(formData);
+  }
 
-        {isAddingLanguage && (
-          <View>
-            <TextInput
-              value={newLanguage}
-              onChangeText={(text) => setNewLanguage(text)}
-            />
-            <Pressable onPress={handleAddLanguage}>
-              <Text>Lägg Till</Text>
-            </Pressable>
-          </View>
-        )}
+  useEffect(() => {
+    getAllLanguages()
+      .then((data) => {
+        console.log(data);
+        setLanguages(data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
 
-        <Text>Genre</Text>
-        {genres.map((g) => (
-          <Pressable key={g} onPress={() => toggleGenre(g)}>
-            <Text>
-              {formData.genre.includes(g) ? "✅ " : "☐ "}
-              {g}
-            </Text>
-            </Pressable>
+  useEffect(() => {
+    getAllGenres()
+      .then((data) => {
+        console.log(data);
+        setGenres(data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
+
+  return (
+    <View>
+      <TextInput
+        value={formData.title}
+        onChangeText={(text) => setFormData({ ...formData, title: text })}
+      />
+      <Picker
+        selectedValue={formData.language}
+        onValueChange={(value) => setFormData({ ...formData, language: value })}
+      >
+        <Picker.Item label="Välj språk..." value="" />
+        {languages.map((lang) => (
+          <Picker.Item key={lang} label={lang} value={lang} />
         ))}
+      </Picker>
+      <Pressable onPress={() => setIsAddingLanguage(!isAddingLanguage)}>
+        <Text>+ Nytt Språk</Text>
+      </Pressable>
 
-        <Pressable onPress={handleSubmit}>
-          <Text>Spara</Text>
+      {isAddingLanguage && (
+        <View>
+          <TextInput
+            value={newLanguage}
+            onChangeText={(text) => setNewLanguage(text)}
+          />
+          <Pressable onPress={handleAddLanguage}>
+            <Text>Lägg Till</Text>
+          </Pressable>
+        </View>
+      )}
+
+      <Text>Genre</Text>
+      {genres.map((g) => (
+        <Pressable key={g} onPress={() => toggleGenre(g)}>
+          <Text>
+            {formData.genre.includes(g) ? "✅ " : "☐ "}
+            {g}
+          </Text>
         </Pressable>
-      </View>
-    );   
+      ))}
+
+      <Pressable onPress={() => setIsAddingGenre(!isAddingGenre)}>
+        <Text>+ Ny genre</Text>
+      </Pressable>
+
+      {isAddingGenre && (
+        <View>
+          <TextInput
+            value={newGenre}
+            onChangeText={(text) => setNewGenre(text)}
+          />
+          <Pressable onPress={handleAddGenre}>
+            <Text>Lägg Till</Text>
+          </Pressable>
+        </View>
+      )}
+
+      <Pressable onPress={handleSubmit}>
+        <Text>Spara</Text>
+      </Pressable>
+    </View>
+  );
 }
