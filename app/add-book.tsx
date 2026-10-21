@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { Pressable, TextInput, Text, View } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { getAllGenres, getAllLanguages } from "../api/libraryApi";
-import { formatName } from "../utils/formatName";
+import { formatName, formatPersonName } from "../utils/formatName";
 
 export default function AddBookScreen() {
   const [formData, setFormData] = useState({
     title: "",
     language: "",
     genre: [] as string[],
+    author: [] as string[],
   });
   const [languages, setLanguages] = useState<string[]>([]);
   const [isAddingLanguage, setIsAddingLanguage] = useState(false);
@@ -16,6 +17,7 @@ export default function AddBookScreen() {
   const [genres, setGenres] = useState<string[]>([]);
   const [isAddingGenre, setIsAddingGenre] = useState(false);
   const [newGenre, setNewGenre] = useState("");
+  const [newAuthor, setNewAuthor] = useState("");
 
   function handleAddLanguage() {
     const formatted = formatName(newLanguage);
@@ -70,6 +72,21 @@ export default function AddBookScreen() {
     setIsAddingGenre(false);
   }
 
+  function handleAddAuthor() {
+    const formatted = formatPersonName(newAuthor);
+
+    if (formatted === "") {
+      return;
+    }
+
+    if (formData.author.includes(formatted)) {
+      setNewAuthor("");
+      return;
+    }
+    setFormData({ ...formData, author: [...formData.author, formatted] });
+    setNewAuthor("");
+  }
+
   function handleSubmit() {
     console.log(formData);
   }
@@ -102,6 +119,14 @@ export default function AddBookScreen() {
         value={formData.title}
         onChangeText={(text) => setFormData({ ...formData, title: text })}
       />
+      <Text>Författare</Text>
+      <TextInput
+        value={newAuthor}
+        onChangeText={(text) =>  setNewAuthor(text )}
+      />
+      <Pressable onPress={handleAddAuthor}>
+        <Text>Lägg till författare</Text>
+      </Pressable>
       <Picker
         selectedValue={formData.language}
         onValueChange={(value) => setFormData({ ...formData, language: value })}
