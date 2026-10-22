@@ -3,6 +3,7 @@ import { Pressable, TextInput, Text, View } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { getAllGenres, getAllLanguages } from "../api/libraryApi";
 import { formatName, formatPersonName } from "../utils/formatName";
+import { getAllAuthors } from "../api/bookApi";
 
 export default function AddBookScreen() {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ export default function AddBookScreen() {
   const [genres, setGenres] = useState<string[]>([]);
   const [isAddingGenre, setIsAddingGenre] = useState(false);
   const [newGenre, setNewGenre] = useState("");
+  const [authors, setAuthors] = useState<string[]>([]);
   const [newAuthor, setNewAuthor] = useState("");
 
   function handleAddLanguage() {
@@ -88,12 +90,29 @@ export default function AddBookScreen() {
   }
 
   function removeAuthor(name: string) {
-    setFormData({ ...formData, author: formData.author.filter ((a) => a !== name) });
+    setFormData({
+      ...formData,
+      author: formData.author.filter((a) => a !== name),
+    });
+  }
+
+  function addSuggestedAuthor(name: string) {
+    setFormData({ ...formData, author: [...formData.author, name] });
+    setNewAuthor("");
   }
 
   function handleSubmit() {
     console.log(formData);
   }
+
+  const query = newAuthor.trim().toLowerCase();
+  const suggestions =
+    query === ""
+      ? []
+      : authors.filter(
+          (a) =>
+            a.toLowerCase().includes(query) && !formData.author.includes(a),
+        );
 
   useEffect(() => {
     getAllLanguages()
@@ -117,6 +136,17 @@ export default function AddBookScreen() {
       });
   }, []);
 
+  useEffect(() => {
+    getAllAuthors()
+      .then((data) => {
+        console.log(data);
+        setAuthors(data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
+
   return (
     <View>
       <TextInput
@@ -128,6 +158,11 @@ export default function AddBookScreen() {
         value={newAuthor}
         onChangeText={(text) => setNewAuthor(text)}
       />
+      {suggestions.map((s) => (
+        <Pressable key={s} onPress={() => addSuggestedAuthor(s)}>
+          <Text>{s}</Text>
+        </Pressable>
+      ))}
       <Pressable onPress={handleAddAuthor}>
         <Text>Lägg till författare</Text>
       </Pressable>

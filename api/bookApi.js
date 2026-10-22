@@ -20,6 +20,10 @@ async function searchByAuthor(author) {
     return apiGet("/books/search/author?author=" + author);
 }
 
+async function getAllAuthors() {
+    return apiGet("/books/authors");
+}
+
 async function searchByFormat(bookFormat) {
     return apiGet("/books/search/format?bookFormat=" + bookFormat);
 }
@@ -33,4 +37,4 @@ async function searchByFandom(fandom) {
 }
 
 export {getBooks, getBookById, addBook, deleteBook, searchByAuthor, 
-    searchByFormat, searchByFanficType, searchByFandom}
+    searchByFormat, searchByFanficType, searchByFandom, getAllAuthors}
