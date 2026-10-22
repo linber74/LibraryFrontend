@@ -87,6 +87,10 @@ export default function AddBookScreen() {
     setNewAuthor("");
   }
 
+  function removeAuthor(name: string) {
+    setFormData({ ...formData, author: formData.author.filter ((a) => a !== name) });
+  }
+
   function handleSubmit() {
     console.log(formData);
   }
@@ -122,11 +126,24 @@ export default function AddBookScreen() {
       <Text>Författare</Text>
       <TextInput
         value={newAuthor}
-        onChangeText={(text) =>  setNewAuthor(text )}
+        onChangeText={(text) => setNewAuthor(text)}
       />
       <Pressable onPress={handleAddAuthor}>
         <Text>Lägg till författare</Text>
       </Pressable>
+      {formData.author.map((name) => (
+        <View key={name}>
+          <Text>{name}</Text>
+          <Pressable
+            onPress={() => {
+              removeAuthor(name);
+            }}
+          >
+            <Text>X</Text>
+          </Pressable>
+        </View>
+      ))}
+
       <Picker
         selectedValue={formData.language}
         onValueChange={(value) => setFormData({ ...formData, language: value })}
