@@ -5,13 +5,17 @@ import { getAllGenres, getAllLanguages } from "../api/libraryApi";
 import { formatName, formatPersonName } from "../utils/formatName";
 import { getAllAuthors } from "../api/bookApi";
 
+const BOOK_FORMATS = ["Bok", "Ebook", "Ljudbok", "Fanfiction"]; 
+
 export default function AddBookScreen() {
   const [formData, setFormData] = useState({
     title: "",
     language: "",
     genre: [] as string[],
     author: [] as string[],
+    bookFormat: "",
   });
+
   const [languages, setLanguages] = useState<string[]>([]);
   const [isAddingLanguage, setIsAddingLanguage] = useState(false);
   const [newLanguage, setNewLanguage] = useState("");
@@ -149,10 +153,13 @@ export default function AddBookScreen() {
 
   return (
     <View>
+      {/*title*/}
       <TextInput
         value={formData.title}
         onChangeText={(text) => setFormData({ ...formData, title: text })}
       />
+
+      {/*author*/}
       <Text>Författare</Text>
       <TextInput
         value={newAuthor}
@@ -179,31 +186,7 @@ export default function AddBookScreen() {
         </View>
       ))}
 
-      <Picker
-        selectedValue={formData.language}
-        onValueChange={(value) => setFormData({ ...formData, language: value })}
-      >
-        <Picker.Item label="Välj språk..." value="" />
-        {languages.map((lang) => (
-          <Picker.Item key={lang} label={lang} value={lang} />
-        ))}
-      </Picker>
-      <Pressable onPress={() => setIsAddingLanguage(!isAddingLanguage)}>
-        <Text>+ Nytt Språk</Text>
-      </Pressable>
-
-      {isAddingLanguage && (
-        <View>
-          <TextInput
-            value={newLanguage}
-            onChangeText={(text) => setNewLanguage(text)}
-          />
-          <Pressable onPress={handleAddLanguage}>
-            <Text>Lägg Till</Text>
-          </Pressable>
-        </View>
-      )}
-
+      {/*genre*/}
       <Text>Genre</Text>
       {genres.map((g) => (
         <Pressable key={g} onPress={() => toggleGenre(g)}>
@@ -230,6 +213,44 @@ export default function AddBookScreen() {
         </View>
       )}
 
+      {/*language*/}
+      <Text>Språk</Text>
+      <Picker
+        selectedValue={formData.language}
+        onValueChange={(value) => setFormData({ ...formData, language: value })}
+      >
+        <Picker.Item label="Välj språk..." value="" />
+        {languages.map((lang) => (
+          <Picker.Item key={lang} label={lang} value={lang} />
+        ))}
+      </Picker>
+      <Pressable onPress={() => setIsAddingLanguage(!isAddingLanguage)}>
+        <Text>+ Nytt Språk</Text>
+      </Pressable>
+
+      {isAddingLanguage && (
+        <View>
+          <TextInput
+            value={newLanguage}
+            onChangeText={(text) => setNewLanguage(text)}
+          />
+          <Pressable onPress={handleAddLanguage}>
+            <Text>Lägg Till</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/*bokformat*/}
+      <Text>Bokformat</Text>
+      <Picker
+        selectedValue={formData.bookFormat}
+        onValueChange={(value) => setFormData({ ...formData, bookFormat: value })}
+      >
+        <Picker.Item label="Välj format..." value=""/>
+        {BOOK_FORMATS.map((f) => <Picker.Item key={f} label={f} value={f} />)}
+      </Picker>
+
+      {/*save*/}
       <Pressable onPress={handleSubmit}>
         <Text>Spara</Text>
       </Pressable>
