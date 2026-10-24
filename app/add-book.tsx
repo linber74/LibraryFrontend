@@ -14,6 +14,8 @@ export default function AddBookScreen() {
     genre: [] as string[],
     author: [] as string[],
     bookFormat: "",
+    seriesName: "",
+    seriesPartNumber: "",
   });
 
   const [languages, setLanguages] = useState<string[]>([]);
@@ -244,11 +246,33 @@ export default function AddBookScreen() {
       <Text>Bokformat</Text>
       <Picker
         selectedValue={formData.bookFormat}
-        onValueChange={(value) => setFormData({ ...formData, bookFormat: value })}
+        onValueChange={(value) =>
+          setFormData({ ...formData, bookFormat: value })
+        }
       >
-        <Picker.Item label="Välj format..." value=""/>
-        {BOOK_FORMATS.map((f) => <Picker.Item key={f} label={f} value={f} />)}
+        <Picker.Item label="Välj format..." value="" />
+        {BOOK_FORMATS.map((f) => (
+          <Picker.Item key={f} label={f} value={f} />
+        ))}
       </Picker>
+
+      {/*series*/}
+      <Text>Serienamn</Text>
+      <TextInput
+        value={formData.seriesName}
+        onChangeText={(text) => setFormData({ ...formData, seriesName: text })}
+      />
+
+      {formData.seriesName.trim() !== "" && (
+        <View>
+          <Text>Del nummer</Text>
+          <TextInput
+            value={formData.seriesPartNumber}
+            onChangeText={(text) => setFormData({ ...formData, seriesPartNumber: text })}
+            keyboardType="numeric"
+          />
+        </View>
+      )}
 
       {/*save*/}
       <Pressable onPress={handleSubmit}>
