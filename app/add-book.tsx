@@ -27,6 +27,7 @@ export default function AddBookScreen() {
     seriesPartNumber: "",
     fanficType: "",
     fandom: [] as string[],
+    synopsis: "",
   });
 
   const [languages, setLanguages] = useState<string[]>([]);
@@ -365,10 +366,11 @@ export default function AddBookScreen() {
             value={newFandom}
             onChangeText={(text) => setNewFandom(text)}
           />
-          {fandomsSuggestions.map((f) =>
+          {fandomsSuggestions.map((f) => (
             <Pressable key={f} onPress={() => addSuggestedFandom(f)}>
               <Text>{f}</Text>
-            </Pressable>)}
+            </Pressable>
+          ))}
           <Pressable onPress={handleAddFandom}>
             <Text>Lägg till fandom</Text>
           </Pressable>
@@ -415,6 +417,16 @@ export default function AddBookScreen() {
           />
         </View>
       )}
+
+      {/*synopsis*/}
+      <Text>Sammanfattning</Text>
+      <TextInput
+        value={formData.synopsis}
+        onChangeText={(text) => setFormData({ ...formData, synopsis: text })}
+        multiline={true}
+        maxLength={1000}
+      />
+      <Text>{formData.synopsis.length} / 1000</Text>
 
       {/*universe later */}
 
