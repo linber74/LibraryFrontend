@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
 import { Pressable, TextInput, Text, View } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { getAllGenres, getAllLanguages } from "../api/libraryApi";
+import {
+  getAllGenres,
+  getAllLanguages,
+  getAllSeriesInfo,
+} from "../api/libraryApi";
 import { formatName, formatPersonName } from "../utils/formatName";
 import { getAllAuthors } from "../api/bookApi";
 
-const BOOK_FORMATS = ["Bok", "Ebook", "Ljudbok", "Fanfiction"]; 
+const BOOK_FORMATS = ["Bok", "Ebook", "Ljudbok", "Fanfiction"];
+const FANFIC_TYPES = ["Canon", "AU", "Über", "Original/Okänt"];
 
 export default function AddBookScreen() {
   const [formData, setFormData] = useState({
@@ -16,6 +21,7 @@ export default function AddBookScreen() {
     bookFormat: "",
     seriesName: "",
     seriesPartNumber: "",
+    fanficType: "",
   });
 
   const [languages, setLanguages] = useState<string[]>([]);
@@ -26,6 +32,7 @@ export default function AddBookScreen() {
   const [newGenre, setNewGenre] = useState("");
   const [authors, setAuthors] = useState<string[]>([]);
   const [newAuthor, setNewAuthor] = useState("");
+  const [series, setSeries] = useState<string[]>([]);
 
   function handleAddLanguage() {
     const formatted = formatName(newLanguage);
@@ -120,6 +127,16 @@ export default function AddBookScreen() {
             a.toLowerCase().includes(query) && !formData.author.includes(a),
         );
 
+  const seriesQuery = formData.seriesName.trim().toLowerCase();
+  const seriesSuggestions =
+    seriesQuery === ""
+      ? []
+      : series.filter(
+          (s) =>
+            s.toLowerCase().includes(seriesQuery) &&
+            s.toLowerCase() !== seriesQuery,
+        );
+
   useEffect(() => {
     getAllLanguages()
       .then((data) => {
@@ -147,6 +164,17 @@ export default function AddBookScreen() {
       .then((data) => {
         console.log(data);
         setAuthors(data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
+
+  useEffect(() => {
+    getAllSeriesInfo()
+      .then((data) => {
+        console.log(data);
+        setSeries(data);
       })
       .catch((err) => {
         console.log(err.message);
@@ -256,6 +284,24 @@ export default function AddBookScreen() {
         ))}
       </Picker>
 
+      {/*fanfiction type*/}
+      {formData.bookFormat === "Fanfiction" && (
+        <View>
+          <Text>Fanfiction-typ</Text>
+          <Picker
+            selectedValue={formData.fanficType}
+            onValueChange={(value) =>
+              setFormData({ ...formData, fanficType: value })
+            }
+          >
+            <Picker.Item label="Välj typ..." value="" />
+            {FANFIC_TYPES.map((ff) => (
+              <Picker.Item key={ff} label={ff} value={ff} />
+            ))}
+          </Picker>
+        </View>
+      )}
+
       {/*series*/}
       <Text>Serienamn</Text>
       <TextInput
@@ -263,16 +309,31 @@ export default function AddBookScreen() {
         onChangeText={(text) => setFormData({ ...formData, seriesName: text })}
       />
 
+      {seriesSuggestions.map((s) => (
+        <Pressable
+          key={s}
+          onPress={() => setFormData({ ...formData, seriesName: s })}
+        >
+          <Text>{s}</Text>
+        </Pressable>
+      ))}
+
       {formData.seriesName.trim() !== "" && (
         <View>
           <Text>Del nummer</Text>
           <TextInput
             value={formData.seriesPartNumber}
-            onChangeText={(text) => setFormData({ ...formData, seriesPartNumber: text })}
+            onChangeText={(text) =>
+              setFormData({ ...formData, seriesPartNumber: text })
+            }
             keyboardType="numeric"
           />
         </View>
       )}
+
+      {/*Fandom*/}
+
+      {/*universe later */}
 
       {/*save*/}
       <Pressable onPress={handleSubmit}>
