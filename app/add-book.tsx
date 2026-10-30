@@ -6,8 +6,12 @@ import {
   getAllLanguages,
   getAllSeriesInfo,
 } from "../api/libraryApi";
-import { formatName, formatPersonName } from "../utils/formatName";
-import { getAllAuthors } from "../api/bookApi";
+import {
+  formatName,
+  formatPersonName,
+  capitalizeFirst,
+} from "../utils/formatName";
+import { getAllAuthors, getAllFandoms } from "../api/bookApi";
 
 const BOOK_FORMATS = ["Bok", "Ebook", "Ljudbok", "Fanfiction"];
 const FANFIC_TYPES = ["Canon", "AU", "Über", "Original/Okänt"];
@@ -22,6 +26,7 @@ export default function AddBookScreen() {
     seriesName: "",
     seriesPartNumber: "",
     fanficType: "",
+    fandom: [] as string[],
   });
 
   const [languages, setLanguages] = useState<string[]>([]);
@@ -33,6 +38,8 @@ export default function AddBookScreen() {
   const [authors, setAuthors] = useState<string[]>([]);
   const [newAuthor, setNewAuthor] = useState("");
   const [series, setSeries] = useState<string[]>([]);
+  const [fandoms, setFandoms] = useState<string[]>([]);
+  const [newFandom, setNewFandom] = useState("");
 
   function handleAddLanguage() {
     const formatted = formatName(newLanguage);
@@ -114,6 +121,33 @@ export default function AddBookScreen() {
     setNewAuthor("");
   }
 
+  function handleAddFandom() {
+    const formatted = capitalizeFirst(newFandom);
+
+    if (formatted === "") {
+      return;
+    }
+
+    if (formData.fandom.includes(formatted)) {
+      setNewFandom("");
+      return;
+    }
+    setFormData({ ...formData, fandom: [...formData.fandom, formatted] });
+    setNewFandom("");
+  }
+
+  function removeFandom(name: string) {
+    setFormData({
+      ...formData,
+      fandom: formData.fandom.filter((f) => f !== name),
+    });
+  }
+
+  function addSuggestedFandom(name: string) {
+    setFormData({ ...formData, fandom: [...formData.fandom, name] });
+    setNewFandom("");
+  }
+
   function handleSubmit() {
     console.log(formData);
   }
@@ -135,6 +169,16 @@ export default function AddBookScreen() {
           (s) =>
             s.toLowerCase().includes(seriesQuery) &&
             s.toLowerCase() !== seriesQuery,
+        );
+
+  const fandomQuery = newFandom.trim().toLowerCase();
+  const fandomsSuggestions =
+    fandomQuery === ""
+      ? []
+      : fandoms.filter(
+          (f) =>
+            f.toLowerCase().includes(fandomQuery) &&
+            !formData.fandom.includes(f),
         );
 
   useEffect(() => {
@@ -175,6 +219,17 @@ export default function AddBookScreen() {
       .then((data) => {
         console.log(data);
         setSeries(data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
+
+  useEffect(() => {
+    getAllFandoms()
+      .then((data) => {
+        console.log(data);
+        setFandoms(data);
       })
       .catch((err) => {
         console.log(err.message);
@@ -302,6 +357,36 @@ export default function AddBookScreen() {
         </View>
       )}
 
+      {/*Fandom*/}
+      {formData.bookFormat === "Fanfiction" && (
+        <View>
+          <Text>Fandom</Text>
+          <TextInput
+            value={newFandom}
+            onChangeText={(text) => setNewFandom(text)}
+          />
+          {fandomsSuggestions.map((f) =>
+            <Pressable key={f} onPress={() => addSuggestedFandom(f)}>
+              <Text>{f}</Text>
+            </Pressable>)}
+          <Pressable onPress={handleAddFandom}>
+            <Text>Lägg till fandom</Text>
+          </Pressable>
+          {formData.fandom.map((name) => (
+            <View key={name}>
+              <Text>{name}</Text>
+              <Pressable
+                onPress={() => {
+                  removeFandom(name);
+                }}
+              >
+                <Text>X</Text>
+              </Pressable>
+            </View>
+          ))}
+        </View>
+      )}
+
       {/*series*/}
       <Text>Serienamn</Text>
       <TextInput
@@ -330,8 +415,6 @@ export default function AddBookScreen() {
           />
         </View>
       )}
-
-      {/*Fandom*/}
 
       {/*universe later */}
 
