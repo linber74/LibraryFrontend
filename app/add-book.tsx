@@ -28,7 +28,7 @@ const EMPTY_FORM = {
   fandom: [] as string[],
   universeName: "",
   synopsis: "",
-}
+};
 
 export default function AddBookScreen() {
   const [formData, setFormData] = useState(EMPTY_FORM);
@@ -46,6 +46,7 @@ export default function AddBookScreen() {
   const [newFandom, setNewFandom] = useState("");
   const [universes, setUniverses] = useState<string[]>([]);
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
 
   function handleAddLanguage() {
     const formatted = formatName(newLanguage);
@@ -155,18 +156,28 @@ export default function AddBookScreen() {
   }
 
   function handleSubmit() {
+    const newErrors: string[] = [];
+
     if (formData.title.trim() === "") {
-      return;
+      newErrors.push("Titel saknas");
     }
     if (formData.language === "") {
-      return;
+      newErrors.push("Språk saknas");
     }
     if (formData.author.length === 0) {
-      return;
+      newErrors.push("Minst en författare krävs");
     }
     if (formData.bookFormat === "") {
+      newErrors.push("Bokformat saknas");
+    }
+
+    if (newErrors.length > 0) {
+      setErrors(newErrors);
+      setMessage("");
       return;
     }
+
+    setErrors([]);
 
     const isFanFic = formData.bookFormat === "Fanfiction";
     const seriesName = formData.seriesName.trim();
@@ -531,6 +542,9 @@ export default function AddBookScreen() {
       <Pressable onPress={handleSubmit}>
         <Text>Spara</Text>
       </Pressable>
+      {errors.map((e) => (
+        <Text key={e}>{e}</Text>
+      ))}
       {message !== "" && <Text>{message}</Text>}
     </View>
   );
