@@ -12,25 +12,26 @@ import {
   formatPersonName,
   capitalizeFirst,
 } from "../utils/formatName";
-import { getAllAuthors, getAllFandoms } from "../api/bookApi";
+import { getAllAuthors, getAllFandoms, addBook } from "../api/bookApi";
 
 const BOOK_FORMATS = ["Bok", "Ebook", "Ljudbok", "Fanfiction"];
 const FANFIC_TYPES = ["Canon", "AU", "Über", "Original/Okänt"];
+const EMPTY_FORM = {
+  title: "",
+  language: "",
+  genre: [] as string[],
+  author: [] as string[],
+  bookFormat: "",
+  seriesName: "",
+  seriesPartNumber: "",
+  fanficType: "",
+  fandom: [] as string[],
+  universeName: "",
+  synopsis: "",
+}
 
 export default function AddBookScreen() {
-  const [formData, setFormData] = useState({
-    title: "",
-    language: "",
-    genre: [] as string[],
-    author: [] as string[],
-    bookFormat: "",
-    seriesName: "",
-    seriesPartNumber: "",
-    fanficType: "",
-    fandom: [] as string[],
-    universeName: "",
-    synopsis: "",
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
   const [languages, setLanguages] = useState<string[]>([]);
   const [isAddingLanguage, setIsAddingLanguage] = useState(false);
@@ -44,6 +45,7 @@ export default function AddBookScreen() {
   const [fandoms, setFandoms] = useState<string[]>([]);
   const [newFandom, setNewFandom] = useState("");
   const [universes, setUniverses] = useState<string[]>([]);
+  const [message, setMessage] = useState("");
 
   function handleAddLanguage() {
     const formatted = formatName(newLanguage);
@@ -153,7 +155,58 @@ export default function AddBookScreen() {
   }
 
   function handleSubmit() {
-    console.log(formData);
+    if (formData.title.trim() === "") {
+      return;
+    }
+    if (formData.language === "") {
+      return;
+    }
+    if (formData.author.length === 0) {
+      return;
+    }
+    if (formData.bookFormat === "") {
+      return;
+    }
+
+    const isFanFic = formData.bookFormat === "Fanfiction";
+    const seriesName = formData.seriesName.trim();
+    const universeName = formData.universeName.trim();
+    const synopsis = formData.synopsis.trim();
+
+    const bookRequest = {
+      title: formData.title.trim(),
+      language: formData.language,
+      genre: formData.genre,
+      author: formData.author,
+      bookFormat: formData.bookFormat,
+      seriesName: seriesName === "" ? null : capitalizeFirst(seriesName),
+
+      seriesPartNumber:
+        seriesName === "" || formData.seriesPartNumber.trim() === ""
+          ? null
+          : Number(formData.seriesPartNumber),
+
+      fanficType:
+        isFanFic && formData.fanficType !== "" ? formData.fanficType : null,
+
+      fandom: isFanFic ? formData.fandom : [],
+
+      universeName: universeName === "" ? null : capitalizeFirst(universeName),
+      synopsis: synopsis === "" ? null : synopsis,
+    };
+    console.log(bookRequest);
+    addBook(bookRequest)
+      .then((data) => {
+        console.log("Sparad:", data);
+        setFormData(EMPTY_FORM);
+        setNewAuthor("");
+        setNewFandom("");
+        setMessage("Boken är sparad ✅");
+      })
+      .catch((err) => {
+        console.log(err.message);
+        setMessage("Något gick fel: " + err.message);
+      });
   }
 
   const query = newAuthor.trim().toLowerCase();
@@ -264,6 +317,7 @@ export default function AddBookScreen() {
   return (
     <View>
       {/*title*/}
+      <Text>Titel</Text>
       <TextInput
         value={formData.title}
         onChangeText={(text) => setFormData({ ...formData, title: text })}
@@ -435,7 +489,10 @@ export default function AddBookScreen() {
           <TextInput
             value={formData.seriesPartNumber}
             onChangeText={(text) =>
-              setFormData({ ...formData, seriesPartNumber: text })
+              setFormData({
+                ...formData,
+                seriesPartNumber: text.replace(/\D/g, ""),
+              })
             }
             keyboardType="numeric"
           />
@@ -446,7 +503,9 @@ export default function AddBookScreen() {
       <Text>Universum</Text>
       <TextInput
         value={formData.universeName}
-        onChangeText={(text) => setFormData({ ...formData, universeName: text })}
+        onChangeText={(text) =>
+          setFormData({ ...formData, universeName: text })
+        }
       />
 
       {universeSuggestions.map((u) => (
@@ -472,6 +531,7 @@ export default function AddBookScreen() {
       <Pressable onPress={handleSubmit}>
         <Text>Spara</Text>
       </Pressable>
+      {message !== "" && <Text>{message}</Text>}
     </View>
   );
 }
