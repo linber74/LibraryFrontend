@@ -161,6 +161,24 @@ export default function AddBookScreen() {
       .catch((err) => console.log(err.message));
   }
 
+  function loadSeries() {
+    getAllSeriesInfo()
+      .then((data) => setSeries(data))
+      .catch((err) => console.log(err.message));
+  }
+
+  function loadFandoms() {
+    getAllFandoms()
+      .then((data) => setFandoms(data))
+    .catch((err)=> console.log(err.message))
+  }
+
+  function loadUniverses() {
+    getAllUniverses()
+      .then((data) => setUniverses(data))
+      .catch((err) => console.log(err.message));
+  }
+
   function handleSubmit() {
     const newErrors: string[] = [];
 
@@ -220,6 +238,9 @@ export default function AddBookScreen() {
         setNewFandom("");
         setMessage("Boken är sparad ✅");
         loadAuthors();
+        loadSeries();
+        loadFandoms();
+        loadUniverses();
       })
       .catch((err) => {
         console.log(err.message);
@@ -293,36 +314,15 @@ export default function AddBookScreen() {
   }, []);
 
   useEffect(() => {
-    getAllSeriesInfo()
-      .then((data) => {
-        console.log(data);
-        setSeries(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    loadSeries();
   }, []);
 
   useEffect(() => {
-    getAllFandoms()
-      .then((data) => {
-        console.log(data);
-        setFandoms(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    loadFandoms();
   }, []);
 
   useEffect(() => {
-    getAllUniverses()
-      .then((data) => {
-        console.log(data);
-        setUniverses(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    loadUniverses();
   }, []);
 
   return (
