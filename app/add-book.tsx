@@ -331,7 +331,10 @@ export default function AddBookScreen() {
       <Text>Titel</Text>
       <TextInput
         value={formData.title}
-        onChangeText={(text) => setFormData({ ...formData, title: text })}
+        onChangeText={(text) => {
+          setFormData({ ...formData, title: text });
+          setMessage("");
+        }}
       />
 
       {/*author*/}
