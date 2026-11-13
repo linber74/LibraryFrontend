@@ -32,6 +32,10 @@ async function getAllSeriesInfo() {
     return apiGet ("/library/series");
 }
 
+async function getAllUniverses() {
+    return apiGet("/library/universes")
+}
+
 async function getAllGenres() {
     return apiGet("/genres")
 }
@@ -42,5 +46,5 @@ async function getAllLanguages() {
 
 export { getAllItems, getItemById, deleteItem, searchByType,
     searchByLanguage, searchByTitle, searchByYear, getAllSeriesInfo,
-    getAllGenres, getAllLanguages
+    getAllUniverses, getAllGenres, getAllLanguages
 }

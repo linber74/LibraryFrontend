@@ -5,6 +5,7 @@ import {
   getAllGenres,
   getAllLanguages,
   getAllSeriesInfo,
+  getAllUniverses,
 } from "../api/libraryApi";
 import {
   formatName,
@@ -27,6 +28,7 @@ export default function AddBookScreen() {
     seriesPartNumber: "",
     fanficType: "",
     fandom: [] as string[],
+    universeName: "",
     synopsis: "",
   });
 
@@ -41,6 +43,7 @@ export default function AddBookScreen() {
   const [series, setSeries] = useState<string[]>([]);
   const [fandoms, setFandoms] = useState<string[]>([]);
   const [newFandom, setNewFandom] = useState("");
+  const [universes, setUniverses] = useState<string[]>([]);
 
   function handleAddLanguage() {
     const formatted = formatName(newLanguage);
@@ -182,6 +185,16 @@ export default function AddBookScreen() {
             !formData.fandom.includes(f),
         );
 
+  const universeQuery = formData.universeName.trim().toLowerCase();
+  const universeSuggestions =
+    universeQuery === ""
+      ? []
+      : universes.filter(
+          (u) =>
+            u.toLowerCase().includes(universeQuery) &&
+            u.toLowerCase() !== universeQuery,
+        );
+
   useEffect(() => {
     getAllLanguages()
       .then((data) => {
@@ -231,6 +244,17 @@ export default function AddBookScreen() {
       .then((data) => {
         console.log(data);
         setFandoms(data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
+
+  useEffect(() => {
+    getAllUniverses()
+      .then((data) => {
+        console.log(data);
+        setUniverses(data);
       })
       .catch((err) => {
         console.log(err.message);
@@ -418,6 +442,22 @@ export default function AddBookScreen() {
         </View>
       )}
 
+      {/*universe */}
+      <Text>Universum</Text>
+      <TextInput
+        value={formData.universeName}
+        onChangeText={(text) => setFormData({ ...formData, universeName: text })}
+      />
+
+      {universeSuggestions.map((u) => (
+        <Pressable
+          key={u}
+          onPress={() => setFormData({ ...formData, universeName: u })}
+        >
+          <Text>{u}</Text>
+        </Pressable>
+      ))}
+
       {/*synopsis*/}
       <Text>Sammanfattning</Text>
       <TextInput
@@ -427,8 +467,6 @@ export default function AddBookScreen() {
         maxLength={1000}
       />
       <Text>{formData.synopsis.length} / 1000</Text>
-
-      {/*universe later */}
 
       {/*save*/}
       <Pressable onPress={handleSubmit}>
