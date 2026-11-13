@@ -155,6 +155,12 @@ export default function AddBookScreen() {
     setNewFandom("");
   }
 
+  function loadAuthors() {
+    getAllAuthors()
+      .then((data) => setAuthors(data))
+      .catch((err) => console.log(err.message));
+  }
+
   function handleSubmit() {
     const newErrors: string[] = [];
 
@@ -213,6 +219,7 @@ export default function AddBookScreen() {
         setNewAuthor("");
         setNewFandom("");
         setMessage("Boken är sparad ✅");
+        loadAuthors();
       })
       .catch((err) => {
         console.log(err.message);
@@ -282,14 +289,7 @@ export default function AddBookScreen() {
   }, []);
 
   useEffect(() => {
-    getAllAuthors()
-      .then((data) => {
-        console.log(data);
-        setAuthors(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    loadAuthors();
   }, []);
 
   useEffect(() => {
