@@ -1,34 +1,97 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getBooks } from "../api/bookApi";
-import { Text, View, FlatList, Pressable } from "react-native";
+import { Text, View, FlatList, Pressable, TextInput } from "react-native";
 import { Book } from "../types/Book";
 import { useRouter } from "expo-router";
 
+const COLUMNS = [
+  { key: "title", label: "Titel", flex: 2 },
+  { key: "author", label: "Författare", flex: 2 },
+  { key: "format", label: "Format", flex: 1 },
+  { key: "fandom", label: "Fandom", flex: 1.5 },
+  { key: "language", label: "Språk", flex: 1 },
+  { key: "genre", label: "Genre", flex: 1 },
+  { key: "series", label: "Serie", flex: 1.5 },
+];
+
+function getCellText(book: Book, key: string): string {
+  if (key == "title") {
+    return book.title;
+  }
+  if (key == "author") {
+    return book.author.join(", ");
+  }
+  if (key == "format") {
+    return book.bookFormat;
+  }
+  if (key == "fandom") { return (book.fandom ?? []).join(", "); }
+  if (key == "language") {
+    return book.language;
+  }
+  if (key == "genre") {
+    return book.genre.join(", ");
+  }
+  if (key == "series") {
+    if (book.seriesName === null) {
+      return "";
+    } else if (book.seriesPartNumber === null) {
+      return book.seriesName;
+    } else {
+      return book.seriesName + " #" + book.seriesPartNumber;
+    }
+  }
+  return "";
+}
+
 export default function BooksScreen() {
   const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [query, setQuery] = useState("");
+  const [searchField, setSearchField] = useState("title");
   const router = useRouter();
 
-  useEffect(() => {
+  function loadAllBooks() {
+    setLoading(true);
+    setError(null);
+
     getBooks()
       .then((data) => {
         setBooks(data);
         setLoading(false);
+        setHasSearched(true);
       })
       .catch((err) => {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }
+
+  const filtered = books.filter((book) =>
+    getCellText(book, searchField)
+      .toLowerCase()
+      .includes(query.trim().toLowerCase()),
+  );
+
+  const selectedColumn = COLUMNS.find((col) => col.key === searchField);
+  const selected = COLUMNS.filter((col) => col.key === searchField);
+  const rest = COLUMNS.filter((col) => col.key !== searchField);
+  const orderedColumns = [...selected, ...rest];
 
   return (
     <FlatList
-      data={books}
+      data={filtered}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
         <Pressable onPress={() => router.push(`/item/${item.id.toString()}`)}>
-          <Text>{item.title}</Text>
+          <View style={{ flexDirection: "row" }}>
+            {orderedColumns.map((col) => (
+              <Text key={col.key} style={{ flex: col.flex }}>
+                {getCellText(item, col.key)}
+              </Text>
+            ))}
+          </View>
         </Pressable>
       )}
       contentInsetAdjustmentBehavior="automatic"
@@ -38,12 +101,55 @@ export default function BooksScreen() {
           <Pressable onPress={() => router.push("/add-book")}>
             <Text>Lägg till bok</Text>
           </Pressable>
+          <Pressable onPress={loadAllBooks}>
+            <Text>Visa alla böcker</Text>
+          </Pressable>
+          <View style={{ flexDirection: "row" }}>
+            {COLUMNS.map((col) => (
+              <Pressable key={col.key} onPress={() => setSearchField(col.key)}>
+                <Text
+                  style={{
+                    fontWeight: col.key === searchField ? "bold" : "normal",
+                    marginRight: 12,
+                  }}
+                >
+                  {col.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <TextInput
+            value={query}
+            onChangeText={(text) => {
+              setQuery(text);
+              if (!hasSearched && !loading) {
+                loadAllBooks();
+              }
+            }}
+            placeholder={
+              "Sök " + (selectedColumn?.label.toLowerCase() ?? "") + "..."
+            }
+          />
           {error && <Text>Något gick fel: {error}</Text>}
           {loading && <Text>Laddar...</Text>}
+          {books.length > 0 && (
+            <View style={{ flexDirection: "row" }}>
+              {orderedColumns.map((col) => (
+                <Text
+                  key={col.key}
+                  style={{ flex: col.flex, fontWeight: "bold" }}
+                >
+                  {col.label}
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
       }
       ListEmptyComponent={
-        !loading && !error ? <Text>Inga böcker än</Text> : undefined
+        hasSearched && !loading && !error ? (
+          <Text>Inga böcker hittades</Text>
+        ) : undefined
       }
     />
   );
