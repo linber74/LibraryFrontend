@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getBooks } from "../api/bookApi";
-import { Text, View, FlatList, Pressable } from "react-native";
+import { Text, View, FlatList, Pressable, TextInput } from "react-native";
 import { Book } from "../types/Book";
 import { useRouter } from "expo-router";
 
@@ -46,6 +46,7 @@ export default function BooksScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [query, setQuery] = useState("");
   const router = useRouter();
 
   function loadAllBooks() {
@@ -64,9 +65,13 @@ export default function BooksScreen() {
       });
   }
 
+  const filtered = books.filter((book) =>
+    book.title.toLowerCase().includes(query.trim().toLowerCase()),
+  );
+
   return (
     <FlatList
-      data={books}
+      data={filtered}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
         <Pressable onPress={() => router.push(`/item/${item.id.toString()}`)}>
@@ -87,14 +92,29 @@ export default function BooksScreen() {
             <Text>Lägg till bok</Text>
           </Pressable>
           <Pressable onPress={loadAllBooks}>
-            <Text>Visa alla Böcker</Text>
+            <Text>Visa alla böcker</Text>
           </Pressable>
+          <TextInput
+            value={query}
+            onChangeText={(text) => {
+              setQuery(text);
+              if (!hasSearched && !loading) {
+                loadAllBooks();
+              }
+            }}
+            placeholder="Sök titel..."
+          />
           {error && <Text>Något gick fel: {error}</Text>}
           {loading && <Text>Laddar...</Text>}
           {books.length > 0 && (
             <View style={{ flexDirection: "row" }}>
               {COLUMNS.map((col) => (
-                <Text key={col.key} style={{ flex: col.flex, fontWeight: "bold" }}>{col.label}</Text>
+                <Text
+                  key={col.key}
+                  style={{ flex: col.flex, fontWeight: "bold" }}
+                >
+                  {col.label}
+                </Text>
               ))}
             </View>
           )}
@@ -102,7 +122,7 @@ export default function BooksScreen() {
       }
       ListEmptyComponent={
         hasSearched && !loading && !error ? (
-          <Text>Inga böcker än</Text>
+          <Text>Inga böcker hittades</Text>
         ) : undefined
       }
     />
